@@ -14,7 +14,7 @@ export class Author extends BaseEntity {
   @Column({ select: false })
   password: string;
 
-  @OneToMany(() => Post, (post) => post.author)
+  @OneToMany(() => Post, (post) => post.author, { nullable: true })
   posts: Post[];
 
   @BeforeInsert()

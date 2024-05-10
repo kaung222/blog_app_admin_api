@@ -1,33 +1,56 @@
-import { Author } from 'src/author/entities/author.entity';
-import { Feedback } from 'src/feedback/entities/feedback.entity';
+import { Author } from '@/auth/entities/author.entity';
+import { Feedback } from '@/feedback/entities/feedback.entity';
+import { Tag } from '@/tag/entities/tag.entity';
+import { BaseEntity } from '@/utils/base.entity';
 import {
   Column,
-  CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity()
-export class Post {
-  //properties
+export class Post extends BaseEntity {
+  // Properties
   @Column()
-  introduction: string;
+  title: string;
+
+  @Column({ unique: true })
+  slug: string;
+
+  @Column('text')
+  body: string;
 
   @Column()
-  contentList: { heading: string; body: string }[];
+  metaDescription: string;
 
-  @Column()
-  conclusion: string;
+  @ManyToMany(() => Tag, (tag) => tag.posts)
+  @JoinTable()
+  tags: Tag[];
 
-  @Column()
+  @Column({ nullable: true })
+  featuredImage: string;
+
+  @Column({ default: 0 })
+  views: number;
+
+  @Column({ nullable: true })
+  timeToRead: number;
+
+  @Column({ default: false })
   isPublished: boolean;
 
-  //relations
+  @Column({ default: null, nullable: true })
+  publishedAt: Date;
+
+  @Column({ default: false })
+  isFeatured: boolean;
+
+  // Relations
   @OneToMany(() => Feedback, (feedback) => feedback.post)
-  feedbacks: Feedback;
+  feedbacks: Feedback[];
 
   @ManyToOne(() => Author, (author) => author.posts)
   author: Author;

@@ -5,7 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { FeedbackModule } from './feedback/feedback.module';
 import { PostModule } from './post/post.module';
-import { AuthorModule } from './author/author.module';
+import { TagModule } from './tag/tag.module';
+import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
+import { Post } from './post/entities/post.entity';
+import { Tag } from './tag/entities/tag.entity';
+import { Feedback } from './feedback/entities/feedback.entity';
+import { Author } from './auth/entities/author.entity';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -17,14 +25,23 @@ import { AuthorModule } from './author/author.module';
       username: process.env.MYSQL_USER,
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
-      autoLoadEntities: true,
+      // autoLoadEntities: true,
+      entities: [Post, Tag, Author, Feedback],
       synchronize: true,
     }),
+    JwtModule.register({ secret: process.env.JWT_SECRET, global: true }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     FeedbackModule,
     PostModule,
-    AuthorModule,
+    TagModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

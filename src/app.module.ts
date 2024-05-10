@@ -19,7 +19,7 @@ import { APP_GUARD } from '@nestjs/core';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'postgres',
       host: process.env.MYSQL_HOST,
       port: parseInt(<string>process.env.MYSQL_PORT),
       username: process.env.MYSQL_USER,

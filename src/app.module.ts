@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { FeedbackModule } from './feedback/feedback.module';
@@ -28,6 +26,7 @@ import { APP_GUARD } from '@nestjs/core';
       // autoLoadEntities: true,
       entities: [Post, Tag, Author, Feedback],
       synchronize: true,
+      logging: true,
     }),
     JwtModule.register({ secret: process.env.JWT_SECRET, global: true }),
     ThrottlerModule.forRoot([
@@ -41,7 +40,7 @@ import { APP_GUARD } from '@nestjs/core';
     TagModule,
     AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  controllers: [],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

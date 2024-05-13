@@ -5,4 +5,7 @@ export class CreateTagDto {
   @ApiProperty()
   @IsNotEmpty()
   name: string;
+
+  @ApiProperty()
+  parentId?: string;
 }

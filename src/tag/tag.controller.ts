@@ -6,17 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { RoleGuard } from '@/security/role.guard';
+import { Role } from '@/security/role.decorator';
 
 @Controller('tag')
 @ApiTags('Tag')
 export class TagController {
   constructor(private readonly tagService: TagService) {}
-
+  @UseGuards(RoleGuard)
+  @Role(['author'])
   @Post()
   create(@Body() createTagDto: CreateTagDto) {
     return this.tagService.create(createTagDto);

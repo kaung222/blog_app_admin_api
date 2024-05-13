@@ -7,6 +7,7 @@ import {
   Tree,
   OneToMany,
   TreeChildren,
+  TreeParent,
 } from 'typeorm';
 
 @Entity()
@@ -22,5 +23,8 @@ export class Tag {
   posts: Post[];
 
   @TreeChildren()
-  related: Tag[];
+  children: Tag[];
+
+  @TreeParent()
+  parent: Tag;
 }

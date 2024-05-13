@@ -1,8 +1,11 @@
 import { Author } from '@/auth/entities/author.entity';
 import { Feedback } from '@/feedback/entities/feedback.entity';
 import { Tag } from '@/tag/entities/tag.entity';
+import { generateUniqueNumber } from '@/utils';
 import { BaseEntity } from '@/utils/base.entity';
+import slugify from 'slugify';
 import {
+  BeforeInsert,
   Column,
   Entity,
   JoinTable,
@@ -23,12 +26,8 @@ export class Post extends BaseEntity {
   @Column('text')
   body: string;
 
-  @Column()
+  @Column({ nullable: true })
   metaDescription: string;
-
-  @ManyToMany(() => Tag, (tag) => tag.posts)
-  @JoinTable()
-  tags: Tag[];
 
   @Column({ nullable: true })
   featuredImage: string;
@@ -42,16 +41,24 @@ export class Post extends BaseEntity {
   @Column({ default: false })
   isPublished: boolean;
 
-  @Column({ default: null, nullable: true })
+  @Column({ default: null })
   publishedAt: Date;
-
-  @Column({ default: false })
-  isFeatured: boolean;
 
   // Relations
   @OneToMany(() => Feedback, (feedback) => feedback.post)
   feedbacks: Feedback[];
 
-  @ManyToOne(() => Author, (author) => author.posts)
+  @ManyToOne(() => Author, (author) => author.posts, { nullable: true })
   author: Author;
+
+  @ManyToMany(() => Tag, (tag) => tag.posts)
+  @JoinTable()
+  tags: Tag[];
+
+  //   methods
+  @BeforeInsert()
+  createSlug() {
+    const random = generateUniqueNumber();
+    this.slug = slugify(this.title, { lower: true }) + '-' + random;
+  }
 }

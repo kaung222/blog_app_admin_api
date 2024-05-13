@@ -33,7 +33,7 @@ export class AuthService {
       where: { email: authorLogin.email },
       select: ['email', 'password', 'id'],
     });
-    if (!author) throw new NotFoundException();
+    if (!author) throw new NotFoundException('User not found');
     console.log(author);
     const isMatchPassword = await bcrypt.compare(
       authorLogin.password,
@@ -41,7 +41,7 @@ export class AuthService {
     );
     if (!isMatchPassword)
       throw new UnauthorizedException('Invalid password or email');
-    const jwtPayload = { id: author.id };
+    const jwtPayload = { id: author.id, role: 'author' };
     const accessToken = this.jwtService.sign(jwtPayload);
     return { message: 'login successfully', accessToken };
   }

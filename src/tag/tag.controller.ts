@@ -17,9 +17,9 @@ import { Role } from '@/security/role.decorator';
 
 @Controller('tag')
 @ApiTags('Tag')
-@Role(['admin', 'sysadmin'])
-@ApiBearerAuth()
-@UseGuards(RoleGuard)
+// @Role(['admin', 'sysadmin'])
+// @ApiBearerAuth()
+// @UseGuards(RoleGuard)
 export class TagController {
   constructor(private readonly tagService: TagService) {}
   @Post()

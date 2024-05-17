@@ -3,34 +3,42 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { GetPost } from './dto/get-post.dto';
+import { Tag } from '@/tag/entities/tag.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post)
     private readonly post: Repository<Post>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
   ) {}
   async create(createPostDto: CreatePostDto, authorId: string) {
     const image = createPostDto?.featuredImage?.originalname;
+    const tags = await this.tagRepository.findBy({
+      id: In(createPostDto.tagIds),
+    });
+    console.log(tags);
     const createPost = this.post.create({
       ...createPostDto,
       featuredImage: image ? image : null,
       author: { id: authorId },
+      tags,
     });
 
     return this.post.save(createPost);
   }
 
   async findAll(getPost: GetPost) {
-    const { page = 1, pageLimit = 10, search = '', tag = [] } = getPost;
+    const { page = 1, per_page = 10, search = '', tag = '' } = getPost;
     const queryBuilder = this.post
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.tags', 'tag')
       .leftJoinAndSelect('post.author', 'author')
-      .skip(pageLimit * (page - 1)) // Adjust the skip calculation
-      .take(pageLimit); // Use take instead of limit
+      .skip(per_page * (page - 1)) // Adjust the skip calculation
+      .take(per_page); // Use take instead of limit
 
     // Add conditions for searching title or body
     if (getPost.search) {
@@ -40,12 +48,24 @@ export class PostService {
     }
 
     if (getPost.tag) {
-      queryBuilder.andWhere('tag.id IN (:...ids)', { ids: tag });
+      // queryBuilder.andWhere('tag.id IN (:...ids)', { ids: tag });
+      queryBuilder.andWhere('tag.id=:id', { id: tag });
     }
 
     // Execute the query
-    const posts = await queryBuilder.getMany();
-    return posts;
+    const [posts, total_count] = await queryBuilder.getManyAndCount();
+    // console.log(total_count, posts);
+
+    // response
+    return {
+      _metadata: {
+        page,
+        per_page,
+        page_count: Math.ceil(total_count / per_page),
+        total_count,
+      },
+      records: posts,
+    };
   }
 
   async findOne(id: string) {

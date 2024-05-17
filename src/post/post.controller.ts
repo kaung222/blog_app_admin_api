@@ -25,8 +25,8 @@ export class PostController {
 
   @ApiConsumes('multipart/form-data')
   @Post()
-  @UseGuards(RoleGuard)
   @Role(['author'])
+  @UseGuards(RoleGuard)
   create(
     @Body() createPostDto: CreatePostDto,
     @SignedUser('id') authorId: string,

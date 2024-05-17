@@ -11,7 +11,7 @@ import {
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBasicAuth, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RoleGuard } from '@/security/role.guard';
 import { Role } from '@/security/role.decorator';
 
@@ -19,8 +19,9 @@ import { Role } from '@/security/role.decorator';
 @ApiTags('Tag')
 export class TagController {
   constructor(private readonly tagService: TagService) {}
-  @UseGuards(RoleGuard)
+  @ApiBearerAuth()
   @Role(['author'])
+  @UseGuards(RoleGuard)
   @Post()
   create(@Body() createTagDto: CreateTagDto) {
     return this.tagService.create(createTagDto);
@@ -33,7 +34,7 @@ export class TagController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tagService.findOne(+id);
+    return this.tagService.findOne(id);
   }
 
   @Patch(':id')
@@ -43,6 +44,6 @@ export class TagController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.tagService.remove(+id);
+    return this.tagService.remove(id);
   }
 }

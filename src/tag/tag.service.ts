@@ -13,9 +13,10 @@ export class TagService {
     private readonly tagTreeRepository: TreeRepository<Tag>,
   ) {}
   async create(createTagDto: CreateTagDto) {
+    const { parentId } = createTagDto;
     const createTag = this.tagRepository.create({
       ...createTagDto,
-      parent: { id: createTagDto.parentId },
+      parent: parentId ? { id: parentId } : null,
     });
     return await this.tagRepository.save(createTag);
   }
@@ -25,15 +26,17 @@ export class TagService {
     return tags;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tag`;
+  async findOne(id: string) {
+    const tag = await this.tagRepository.findOneBy({ id });
+    // console.log(tag);
+    return await this.tagTreeRepository.findRoots();
   }
 
   update(id: number, updateTagDto: UpdateTagDto) {
     return `This action updates a #${id} tag`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tag`;
+  async remove(id: string) {
+    return await this.tagRepository.delete(id);
   }
 }

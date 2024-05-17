@@ -25,7 +25,7 @@ export class RoleGuard implements CanActivate {
           context.getHandler(),
         ]);
         const { id, role } = this.jwtService.verify(accessToken);
-        console.log(accessToken);
+        // console.log(accessToken);
 
         request.user = { id, role };
         console.log('allow roles are ' + requiredRoles, 'u are:' + role);

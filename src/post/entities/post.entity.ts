@@ -1,5 +1,3 @@
-import { Author } from '@/auth/entities/author.entity';
-import { Feedback } from '@/feedback/entities/feedback.entity';
 import { Tag } from '@/tag/entities/tag.entity';
 import { generateUniqueNumber } from '@/utils';
 import { BaseEntity } from '@/utils/base.entity';
@@ -13,6 +11,8 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
+import { Feedback } from './feedback.entity';
+import { Author } from '@/author/entities/author.entity';
 
 @Entity()
 export class Post extends BaseEntity {
@@ -48,7 +48,7 @@ export class Post extends BaseEntity {
   @OneToMany(() => Feedback, (feedback) => feedback.post)
   feedbacks: Feedback[];
 
-  @ManyToOne(() => Author, (author) => author.posts, { nullable: true })
+  @ManyToOne(() => Author, (author) => author.posts)
   author: Author;
 
   @ManyToMany(() => Tag, (tag) => tag.posts)

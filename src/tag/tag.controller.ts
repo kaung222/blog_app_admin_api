@@ -11,17 +11,17 @@ import {
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { ApiBasicAuth, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RoleGuard } from '@/security/role.guard';
 import { Role } from '@/security/role.decorator';
 
 @Controller('tag')
 @ApiTags('Tag')
+@Role(['admin', 'sysadmin'])
+@ApiBearerAuth()
+@UseGuards(RoleGuard)
 export class TagController {
   constructor(private readonly tagService: TagService) {}
-  @ApiBearerAuth()
-  @Role(['author'])
-  @UseGuards(RoleGuard)
   @Post()
   create(@Body() createTagDto: CreateTagDto) {
     return this.tagService.create(createTagDto);

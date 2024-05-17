@@ -1,61 +1,34 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import { PostService } from './post.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Param, Delete, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { GetPost } from './dto/get-post.dto';
-import { RoleGuard } from '@/security/role.guard';
-import { Role } from '@/security/role.decorator';
-import { SignedUser } from '@/utils/signed-user';
+import { PostGetService } from './services/post-get.service';
+import { PostDeleteService } from './services/post-delete.service';
 
 @Controller('post')
 @ApiTags('Post')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
-
-  @ApiConsumes('multipart/form-data')
-  @ApiBearerAuth()
-  @Post()
-  @Role(['author'])
-  @UseGuards(RoleGuard)
-  create(
-    @Body() createPostDto: CreatePostDto,
-    @SignedUser('id') authorId: string,
-  ) {
-    return this.postService.create(createPostDto, authorId);
-  }
+  constructor(
+    private readonly postGetService: PostGetService,
+    private readonly postDeleteService: PostDeleteService,
+  ) {}
 
   @Get()
   findAll(@Query() getPost: GetPost) {
-    return this.postService.findAll(getPost);
+    return this.postGetService.findAll(getPost);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.postService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postService.update(+id, updatePostDto);
+    return this.postGetService.findOne(id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.postService.remove(+id);
+    return this.postDeleteService.remove(id);
   }
+
   @Post('clear')
   clearPosts() {
-    return this.postService.clearAllPost();
+    return this.postDeleteService.clearAllPost();
   }
 }

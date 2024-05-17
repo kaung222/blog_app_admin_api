@@ -1,17 +1,21 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { FeedbackModule } from './feedback/feedback.module';
 import { PostModule } from './post/post.module';
 import { TagModule } from './tag/tag.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { Post } from './post/entities/post.entity';
 import { Tag } from './tag/entities/tag.entity';
-import { Feedback } from './feedback/entities/feedback.entity';
-import { Author } from './auth/entities/author.entity';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { AdminModule } from './admin/admin.module';
+import { Author } from './author/entities/author.entity';
+import { Feedback } from './post/entities/feedback.entity';
+import { UserModule } from './user/user.module';
+import { AuthorModule } from './author/author.module';
+import { User } from './user/entities/user.entity';
+import { Admin } from './admin/entities/admin.entity';
 
 @Module({
   imports: [
@@ -24,7 +28,7 @@ import { APP_GUARD } from '@nestjs/core';
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
       // autoLoadEntities: true,
-      entities: [Post, Tag, Author, Feedback],
+      entities: [Post, Tag, Author, Feedback, User, Admin],
       synchronize: true,
       logging: true,
     }),
@@ -35,10 +39,13 @@ import { APP_GUARD } from '@nestjs/core';
         limit: 100,
       },
     ]),
-    FeedbackModule,
+
     PostModule,
     TagModule,
     AuthModule,
+    AdminModule,
+    UserModule,
+    AuthorModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

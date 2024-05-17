@@ -12,7 +12,7 @@ import {
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { GetPost } from './dto/get-post.dto';
 import { RoleGuard } from '@/security/role.guard';
 import { Role } from '@/security/role.decorator';
@@ -24,6 +24,7 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @ApiConsumes('multipart/form-data')
+  @ApiBearerAuth()
   @Post()
   @Role(['author'])
   @UseGuards(RoleGuard)

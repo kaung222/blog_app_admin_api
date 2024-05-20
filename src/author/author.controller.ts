@@ -24,11 +24,16 @@ export class AuthorController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.authorService.findOne(+id);
+    return this.authorService.findOne(id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.authorService.remove(+id);
+    return this.authorService.remove(id);
+  }
+
+  @Post(':id/approved')
+  approveAuthor(@Param('id') id: string) {
+    return this.authorService.approveAuthor(id);
   }
 }

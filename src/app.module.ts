@@ -16,6 +16,9 @@ import { UserModule } from './user/user.module';
 import { AuthorModule } from './author/author.module';
 import { User } from './user/entities/user.entity';
 import { Admin } from './admin/entities/admin.entity';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { BullModule } from '@nestjs/bull';
+import { OtpEntity } from './auth/entities/otp.entity';
 
 @Module({
   imports: [
@@ -28,7 +31,7 @@ import { Admin } from './admin/entities/admin.entity';
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
       // autoLoadEntities: true,
-      entities: [Post, Tag, Author, Feedback, User, Admin],
+      entities: [Post, Tag, Author, Feedback, User, Admin, OtpEntity],
       synchronize: true,
       logging: true,
     }),
@@ -39,7 +42,22 @@ import { Admin } from './admin/entities/admin.entity';
         limit: 100,
       },
     ]),
-
+    MailerModule.forRoot({
+      transport: {
+        service: 'Gmail',
+        auth: {
+          user: process.env.SHOP_GMAIL,
+          pass: process.env.SHOP_GMAIL_PASSWORD,
+        },
+      },
+    }),
+    BullModule.forRoot({
+      redis: {
+        port: parseInt(process.env.REDIS_PORT),
+        host: process.env.REDIS_HOST,
+        password: process.env.REDIS_PASSWORD,
+      },
+    }),
     PostModule,
     TagModule,
     AuthModule,

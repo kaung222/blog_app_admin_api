@@ -8,4 +8,7 @@ export class Admin extends BaseEntity {
 
   @Column({ unique: true })
   email: string;
+
+  @Column({ type: 'enum', enum: ['admin', 'sysadmin'], default: 'admin' })
+  role: string;
 }

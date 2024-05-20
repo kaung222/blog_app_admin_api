@@ -14,6 +14,9 @@ export class Author extends BaseEntity {
   @Column({ select: false })
   password: string;
 
+  @Column({ type: 'enum', enum: ['approved', 'pending'], default: 'pending' })
+  status: string;
+
   @OneToMany(() => Post, (post) => post.author, { nullable: true })
   posts: Post[];
 

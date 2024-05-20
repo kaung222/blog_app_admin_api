@@ -11,23 +11,23 @@ export class AuthorService {
     @InjectRepository(Author)
     private readonly authorRepository: Repository<Author>,
   ) {}
-  create(createAuthorDto: CreateAuthorDto) {
-    return 'This action adds a new author';
-  }
 
   findAll() {
     return this.authorRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} author`;
+  findOne(id: string) {
+    return this.authorRepository.findOneBy({ id });
   }
 
-  update(id: number, updateAuthorDto: UpdateAuthorDto) {
-    return `This action updates a #${id} author`;
+  async approveAuthor(id: string) {
+    const updateAuthor = await this.authorRepository.update(id, {
+      status: 'approved',
+    });
+    return;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} author`;
   }
 }

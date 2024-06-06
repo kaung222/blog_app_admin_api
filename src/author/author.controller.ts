@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { GetAuthorDto } from './dto/get-author.dto';
 
 @Controller('author')
 @ApiTags('Author')
@@ -18,8 +20,8 @@ export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
   @Get()
-  findAll() {
-    return this.authorService.findAll();
+  findAll(@Query() getAuthor: GetAuthorDto) {
+    return this.authorService.findAll(getAuthor);
   }
 
   @Get(':id')

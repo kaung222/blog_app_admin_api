@@ -12,6 +12,8 @@ export class PostGetService {
   ) {}
 
   async findAll(getPost: GetPost) {
+    console.log(getPost.page, getPost.per_page);
+
     const { page = 1, per_page = 10, search = '', tag = '' } = getPost;
     const queryBuilder = this.post
       .createQueryBuilder('post')

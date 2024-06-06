@@ -4,6 +4,7 @@ import { UpdateAuthorDto } from './dto/update-author.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Author } from './entities/author.entity';
 import { Repository } from 'typeorm';
+import { GetAuthorDto } from './dto/get-author.dto';
 
 @Injectable()
 export class AuthorService {
@@ -12,8 +13,28 @@ export class AuthorService {
     private readonly authorRepository: Repository<Author>,
   ) {}
 
-  findAll() {
-    return this.authorRepository.find();
+  async findAll(getAuthor: GetAuthorDto) {
+    const { per_page = 10, page = 1, search } = getAuthor;
+
+    const queryBuilder = this.authorRepository
+      .createQueryBuilder('author')
+      .skip(per_page * (page - 1))
+      .take(per_page);
+    if (search) {
+      queryBuilder
+        .andWhere('author.email=:search', { search })
+        .orWhere('author.username=:search', { search });
+    }
+
+    const [authors, total_count] = await queryBuilder.getManyAndCount();
+    return {
+      records: authors,
+      _metadata: {
+        per_page,
+        page,
+        total_count,
+      },
+    };
   }
 
   findOne(id: string) {

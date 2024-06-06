@@ -1,10 +1,5 @@
-import { Transform } from 'class-transformer';
+import { BaseDto } from '@/utils/base.dto';
 
-export class GetPost {
-  search?: string;
-  @Transform(({ value }) => parseInt(value))
-  page?: number;
-  @Transform(({ value }) => parseInt(value))
-  per_page?: number;
+export class GetPost extends BaseDto {
   tag?: string;
 }

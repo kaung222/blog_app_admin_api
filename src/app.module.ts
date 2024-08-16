@@ -1,24 +1,23 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { PostModule } from './post/post.module';
-import { TagModule } from './tag/tag.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { Post } from './post/entities/post.entity';
-import { Tag } from './tag/entities/tag.entity';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AdminModule } from './admin/admin.module';
-import { Author } from './author/entities/author.entity';
-import { Feedback } from './post/entities/feedback.entity';
-import { UserModule } from './user/user.module';
-import { AuthorModule } from './author/author.module';
-import { User } from './user/entities/user.entity';
 import { Admin } from './admin/entities/admin.entity';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { BullModule } from '@nestjs/bull';
 import { OtpEntity } from './auth/entities/otp.entity';
+import { ClinicModule } from './clinic/clinic.module';
+import { RoleGuard } from './security/role.guard';
+import { MicroserviceModule } from './microservices/microservice.module';
+import { UserModule } from './user/user.module';
+import { ClinicTypeModule } from './clinic-type/clinic-type.module';
+import { TagModule } from './tag/tag.module';
+import { StatisticsModule } from './statistics/statistics.module';
+import { DoctorModule } from './doctor/doctor.module';
+import { PostModule } from './post/post.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -30,42 +29,33 @@ import { OtpEntity } from './auth/entities/otp.entity';
       username: process.env.MYSQL_USER,
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
-      // autoLoadEntities: true,
-      entities: [Post, Tag, Author, Feedback, User, Admin, OtpEntity],
+      entities: [Admin, OtpEntity],
       synchronize: true,
       logging: true,
     }),
     JwtModule.register({ secret: process.env.JWT_SECRET, global: true }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000,
-        limit: 100,
+        ttl: 10000,
+        limit: 10,
       },
     ]),
-    MailerModule.forRoot({
-      transport: {
-        service: 'Gmail',
-        auth: {
-          user: process.env.SHOP_GMAIL,
-          pass: process.env.SHOP_GMAIL_PASSWORD,
-        },
-      },
-    }),
-    BullModule.forRoot({
-      redis: {
-        port: parseInt(process.env.REDIS_PORT),
-        host: process.env.REDIS_HOST,
-        password: process.env.REDIS_PASSWORD,
-      },
-    }),
-    PostModule,
-    TagModule,
+    ScheduleModule.forRoot(),
     AuthModule,
     AdminModule,
+    ClinicModule,
     UserModule,
-    AuthorModule,
+    MicroserviceModule,
+    ClinicTypeModule,
+    TagModule,
+    StatisticsModule,
+    DoctorModule,
+    PostModule,
   ],
   controllers: [],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { useClass: RoleGuard, provide: APP_GUARD },
+  ],
 })
 export class AppModule {}

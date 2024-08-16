@@ -1,7 +1,7 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,11 +10,15 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { Admin } from '@/admin/entities/admin.entity';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
 import { OtpEntity } from './entities/otp.entity';
 import { generateOpt } from '@/utils';
-import { SendMailDto } from '@/q-jobs/send-mail.dto';
+import { ClientProxy } from '@nestjs/microservices';
+
+export class SendEmailDto {
+  to: string;
+  text: string;
+  subject: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -24,7 +28,7 @@ export class AuthService {
     private readonly adminRepository: Repository<Admin>,
     @InjectRepository(OtpEntity)
     private otpRepository: Repository<OtpEntity>,
-    @InjectQueue('sendMail-queue') private emailQueue: Queue,
+    @Inject('USER_SERVICE') private readonly userClient: ClientProxy,
   ) {}
 
   async adminLogin(adminLogin: AdminLoginDto) {
@@ -34,8 +38,10 @@ export class AuthService {
     });
 
     if (!admin) throw new NotFoundException('Email not found');
+
     const isSysAdmin = admin.role === 'sysadmin';
     const storedOtp = await this.otpRepository.findOneBy({ userId: admin.id });
+    if (!storedOtp) throw new NotFoundException('OTP not found');
     console.log(storedOtp.otp, adminLogin.otp);
 
     const isValid =
@@ -52,6 +58,7 @@ export class AuthService {
   }
 
   async requestOtp(email: string) {
+    // return this.otpRepository.clear();
     const admin = await this.adminRepository.findOneBy({
       email,
     });
@@ -60,17 +67,26 @@ export class AuthService {
     }
 
     const otp = generateOpt();
-    const emailData: SendMailDto = {
+    const otpPayload = {
+      otp,
+      expiredAt: (Date.now() + 300000).toString(),
+      userId: admin.id,
+    };
+    const isExistOtp = await this.otpRepository.findOneBy({
+      userId: admin.id,
+    });
+    if (isExistOtp) {
+      await this.otpRepository.update(isExistOtp.id, otpPayload);
+    } else await this.otpRepository.insert(otpPayload);
+    const emailPayload: SendEmailDto = {
       to: email,
       text: otp,
       subject: 'OTP',
-      id: admin.id,
     };
-    const job = await this.emailQueue.add('sendMail-job', emailData);
-
+    this.userClient.emit('sendEmail', emailPayload);
     return {
+      message: `Send OTP to ${email} successfully`,
       email,
-      message: 'OTP sent successfully',
     };
   }
 

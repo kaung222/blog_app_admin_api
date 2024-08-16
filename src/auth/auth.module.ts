@@ -4,17 +4,10 @@ import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Admin } from '@/admin/entities/admin.entity';
 import { OtpEntity } from './entities/otp.entity';
-import { BullModule } from '@nestjs/bull';
-import { sendEmailService } from '@/q-jobs/send-mail.jobs';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Admin, OtpEntity]),
-    BullModule.registerQueue({
-      name: 'sendMail-queue',
-    }),
-  ],
+  imports: [TypeOrmModule.forFeature([Admin, OtpEntity])],
   controllers: [AuthController],
-  providers: [AuthService, sendEmailService],
+  providers: [AuthService],
 })
 export class AuthModule {}

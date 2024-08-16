@@ -17,7 +17,7 @@ import { GetAdminDto } from './dto/get-admin.dto';
 import { Role } from '@/security/role.decorator';
 import { RoleGuard } from '@/security/role.guard';
 
-@Controller('admin')
+@Controller('admins')
 @ApiTags('Admin')
 @UseGuards(RoleGuard)
 export class AdminController {
